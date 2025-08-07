@@ -13,6 +13,7 @@ const database = firebase.database().ref();
  */
 const messageDiv = document.getElementById("all-messages");
 const username = document.getElementById("username");
+const email = document.getElementById("email");
 const message = document.getElementById("message");
 const submitButton = document.getElementById("send-btn");
 
@@ -28,19 +29,33 @@ submitButton.onclick = updateDB;
  *      - resets the value of #message input element
  */
 
+// Updates the data base
 function updateDB(event) {
   event.preventDefault(); // may not be necessary in this case?
-  
+
+  let fullDate = new Date();
+
   let data = {
-    "username" : username.value,
-    "message" : message.value,
-  }
+    username: username.value,
+    email: email.value,
+    message: message.value,
+    date: fullDate.getMonth() + 1 + "/" + fullDate.getDate() + "/" + fullDate.getFullYear(),
+    time: fullDate.getHours() + ":" + fullDate.getMinutes() + ":" + fullDate.getSeconds(),
+  };
 
-  console.log(data);
+  // DEBUG
+  console.log("Full Date : ", fullDate);
+  console.log("Date : ", fullDate.getDate());
+  console.log("MM/DD/YYYY : ", fullDate.getMonth() + 1 + "/" + fullDate.getDate() + "/" + fullDate.getFullYear())
+  console.log("Data object : ", data);
 
+  // pushes data object to firebase database
   database.push(data);
 
+  // clears ueser message box for convienience
   message.value = "";
+
+  // OBJECTIVES:
   // Prevent default refresh
   // Create data object
   // console.log the object
@@ -74,8 +89,13 @@ function addMessageToBoard(rowData) {
   let data = rowData.val();
   console.log(data);
 
-
-  let singleMessage = makeSingleMessageHTML(data["username"], data["message"]);
+  let singleMessage = makeSingleMessageHTML(
+    data["username"],
+    data["email"],
+    data["message"],
+    data["date"],
+    data["time"],
+  );
 
   messageDiv.append(singleMessage);
 
@@ -104,27 +124,42 @@ function addMessageToBoard(rowData) {
  *      - returns the parent div
  */
 
-function makeSingleMessageHTML(usernameTxt, messageTxt) {
+function makeSingleMessageHTML(usernameTxt, emailTxt, messageTxt, dateTxt, timeTxt) {
   // Create Parent Div
   let parentDiv = document.createElement("div");
 
   // Add Class name .single-message
-  parentDiv.className = "single-message"
+  parentDiv.className = "single-message";
 
   // Create Username P Tag
   let usernameP = document.createElement("p");
-  usernameP.innerHTML = usernameTxt;
-  usernameP.className = "single-message-username"
-
-  // Append username
+  usernameP.innerText = usernameTxt;
+  usernameP.className = "single-message-username";
   parentDiv.append(usernameP); // ??? - Why not append Child???
+
+  // Create email p Tag
+  let emailP = document.createElement("p");
+  emailP.innerText = emailTxt;
+  emailP.className = "single-message-email";
+  parentDiv.append(emailP);
 
   // Create message P Tag
   let messageP = document.createElement("p");
-  messageP.innerHTML = messageTxt;
+  messageP.innerText = messageTxt;
   parentDiv.append(messageP);
-  // Return Parent Div
 
+  // Create date P Tag (I should really make a function at this point :P )
+  let dateP = document.createElement("p");
+  dateP.innerText = dateTxt;
+  dateP.className = "single-message-date"
+  parentDiv.append(dateP);
+
+  let timeP = document.createElement("p");
+  timeP.innerText = timeTxt;
+  timeP.className = "single-message-time";
+  parentDiv.append(timeP);
+
+  // Return Parent Div
   return parentDiv;
 }
 
